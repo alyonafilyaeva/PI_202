@@ -28,3 +28,4 @@
        with:
          context: .
          push: true
+         tags: 26.02
