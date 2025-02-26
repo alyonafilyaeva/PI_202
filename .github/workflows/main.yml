@@ -1,4 +1,4 @@
- name: CI
+ name: CI Filyaeva
 
  on:
    push:
@@ -14,7 +14,7 @@
        attestations: write
        id-token: write
      steps:
-     - name: Checkout code
+     - name: Get the repository
        uses: actions/checkout@v4
      
      - name: Log in to Docker Hub
