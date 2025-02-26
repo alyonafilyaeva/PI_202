@@ -1,26 +1,47 @@
- name: Filyaeva workflows
+name: Publish Docker image
 
- on:
-   push:
-     branches:
-       - main
+on:
+  push:
+    branches:
+      - main
 
- jobs:
-   build:
-     runs-on: ubuntu-latest
-     permissions:
-       packages: write
-       contents: read
-       attestations: write
-       id-token: write
-     steps:
-     - name: Checkout code
-       uses: actions/checkout@v4
-     
-     - name: Log in to Docker Hub
-       run: |
-          echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+      attestations: write
+      id-token: write
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
 
-     - name: Build Docker image
-       run: |
-         docker build -t my-app:latest .
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Add node
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+
+      - name: Build image
+        run: docker image build -t ${{ vars.PROJECT_NAME }} -f ./Dockerfile --platform=linux/amd64 .
+
+      - name: Push image
+        run: docker push ${{ vars.PROJECT_NAME }}
+
+      - name: Create Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }} 
+          body: "Релиз" 
+          draft: false 
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
