@@ -28,4 +28,4 @@
        with:
          context: .
          push: true
-         tags: alyonafilaeva/ci:latest
+         tags: alyonafilyaeva/ci:latest
